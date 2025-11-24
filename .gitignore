@@ -1,1 +1,12 @@
+vendor/
+.phpunit.result.cache
+.env
+*.pfx
+*.pem
+*.key
+composer.lock
+
+# Arquivo de teste com credenciais reais
+test-auth.php
+certificate.pfx
 collection_api_emissao_boletos_sand.json

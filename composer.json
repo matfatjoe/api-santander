@@ -1,0 +1,31 @@
+{
+    "name": "matfatjoe/santander-boleto",
+    "description": "Library for Santander Boleto Emission",
+    "type": "library",
+    "require": {
+        "php": "^7.4",
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "authors": [
+        {
+            "name": "Matheus Furquim de Camargo",
+            "email": "matheusfurquim@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Matfatjoe\\SantanderBoleto\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matfatjoe\\SantanderBoleto\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
