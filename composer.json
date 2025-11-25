@@ -1,15 +1,17 @@
 {
-    "name": "matfatjoe/santander-boleto",
+    "name": "matfatjoe/api-santander",
     "description": "Library for Santander Boleto Emission",
     "type": "library",
+    "license": "MIT",
+    "minimum-stability": "dev",
     "require": {
         "php": "^7.4",
-        "guzzlehttp/guzzle": "^7.10"
+        "guzzlehttp/guzzle": "^7.0"
     },
     "authors": [
         {
             "name": "Matheus Furquim de Camargo",
-            "email": "matheusfurquim@gmail.com"
+            "email": "matheus.fdecamargo@gmail.com"
         }
     ],
     "require-dev": {

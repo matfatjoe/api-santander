@@ -8,8 +8,9 @@ composer.lock
 
 # Arquivos de teste com credenciais reais
 test-auth.php
+test-boleto.php
+test-query.php
 test-workspace.php
-debug-workspace.php
 certificate.pfx
 examples/example-workspace.phpi_emissao_boletos_sand.json
 collection_api_emissao_boletos_sand.json

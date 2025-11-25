@@ -1,201 +1,257 @@
-# Santander Boleto - Biblioteca PHP
+# Santander Boleto API - PHP Library
 
-Biblioteca PHP para emissão e gerenciamento de boletos bancários através da API do Santander.
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D7.4-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## 📋 Requisitos
+Biblioteca PHP para integração com a API de Cobrança do Santander, permitindo o gerenciamento completo de boletos bancários e workspaces.
+
+## 📋 Índice
+
+- [Características](#-características)
+- [Requisitos](#-requisitos)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Uso Básico](#-uso-básico)
+- [Módulos](#-módulos)
+- [Exemplos](#-exemplos)
+- [Testes](#-testes)
+- [Documentação da API](#-documentação-da-api)
+- [Contribuindo](#-contribuindo)
+- [Licença](#-licença)
+
+## ✨ Características
+
+- ✅ **Autenticação mTLS** - Suporte completo a certificados digitais
+- ✅ **Gerenciamento de Workspaces** - CRUD completo de workspaces
+- ✅ **Registro de Boletos** - Emissão de boletos com todos os campos suportados
+- ✅ **Consultas Avançadas** - Múltiplos métodos de consulta (SONDA, por nosso número, por seu número, lista)
+- ✅ **Instruções de Boleto** - Envio de comandos (descontos, multas, baixas, etc.)
+- ✅ **Testes Unitários** - 17 testes, 46 asserções
+- ✅ **PSR-4 Autoloading** - Estrutura moderna e organizada
+- ✅ **Type Hints** - Código fortemente tipado para PHP 7.4+
+
+## 📦 Requisitos
 
 - PHP >= 7.4
 - Composer
-- Extensão OpenSSL habilitada
-- Certificado digital .pfx fornecido pelo Santander
+- Extensões PHP:
+  - `ext-json`
+  - `ext-openssl`
+  - `ext-curl`
+- Certificado digital PFX do Santander
+- Credenciais da API (Client ID e Client Secret)
 
-## 📦 Instalação
+## 🚀 Instalação
 
 ```bash
-composer require matfatjoe/santander-boleto
+composer require matfatjoe/api-santander
 ```
 
-## 🔐 Autenticação
+Ou clone o repositório:
 
-A API do Santander utiliza autenticação mTLS (mutual TLS) com certificado digital. Você precisará de:
+```bash
+git clone https://github.com/matfatjoe/api-santander.git
+cd api-santander
+composer install
+```
 
-1. **Certificado .pfx**: Fornecido pelo Santander ao cadastrar sua aplicação
-2. **Passphrase**: Senha do certificado
-3. **Client ID**: Identificador da sua aplicação
+## ⚙️ Configuração
 
-### Exemplo de Autenticação
+### 1. Certificado Digital
+
+Coloque seu certificado `.pfx` no diretório do projeto e configure as credenciais:
 
 ```php
-<?php
+$pfxPath = __DIR__ . '/certificate.pfx';
+$passphrase = 'sua_senha_do_certificado';
+$clientId = 'seu_client_id';
+$clientSecret = 'seu_client_secret';
+```
 
-require_once 'vendor/autoload.php';
+### 2. Ambiente
 
+```php
+// Sandbox (Testes)
+$baseUrl = 'https://trust-sandbox.api.santander.com.br';
+
+// Produção
+$baseUrl = 'https://trust-open.api.santander.com.br';
+```
+
+## 💡 Uso Básico
+
+### Autenticação
+
+```php
 use Matfatjoe\SantanderBoleto\Auth\Authenticator;
 use Matfatjoe\SantanderBoleto\Auth\TokenRequest;
-use GuzzleHttp\Client;
+use Matfatjoe\SantanderBoleto\HttpClientFactory;
 
-// Configuração
-$pfxPath = '/path/to/certificate.pfx';
-$passphrase = 'certificate_password';
-$clientId = 'your_client_id';
-
-// Criar cliente HTTP
-$httpClient = new Client([
-    'timeout' => 30,
-    'connect_timeout' => 10
-]);
-
-// Criar autenticador
-$authenticator = new Authenticator($httpClient);
-
-// Obter token
-$tokenRequest = new TokenRequest($pfxPath, $passphrase, $clientId);
-$tokenResponse = $authenticator->getToken($tokenRequest);
-
-echo "Access Token: " . $tokenResponse->getAccessToken() . "\n";
-echo "Expira em: " . $tokenResponse->getExpiresIn() . " segundos\n";
+$tokenRequest = new TokenRequest($pfxPath, $passphrase, $clientId, $clientSecret);
+$httpClient = HttpClientFactory::createFromTokenRequest($tokenRequest);
+$authenticator = new Authenticator($httpClient, $baseUrl);
+$token = $authenticator->getToken($tokenRequest);
 ```
 
-## 🏗️ Estrutura do Projeto
-
-```
-src/
-└── Auth/
-    ├── Authenticator.php      # Gerencia autenticação OAuth2 com mTLS
-    ├── TokenRequest.php       # Requisição de token
-    └── TokenResponse.php      # Resposta com token de acesso
-
-tests/
-└── Auth/
-    └── AuthenticatorTest.php  # Testes unitários de autenticação
-
-examples/
-└── example-auth.php           # Exemplo de autenticação
-```
-
-## 🔧 Funcionalidades Implementadas
-
-- [x] **Autenticação OAuth2 com certificado mTLS**
-  - Suporte a certificados .pfx
-  - Extração automática de certificado e chave privada
-  - Gerenciamento de token de acesso
-
-## 📖 Resposta da API de Token
-
-A API retorna os seguintes campos:
-
-```json
-{
-  "access_token": "token_de_acesso",
-  "expires_in": 900,
-  "token_type": "bearer",
-  "not-before-policy": 1614173461,
-  "session_state": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaaa",
-  "scope": ""
-}
-```
-
-Todos os campos estão disponíveis através do objeto `TokenResponse`:
-
-- `getAccessToken()`: Token de acesso para requisições
-- `getExpiresIn()`: Tempo de expiração em segundos
-- `getTokenType()`: Tipo do token (bearer)
-- `getNotBeforePolicy()`: Política de início de validade
-- `getSessionState()`: Estado da sessão
-- `getScope()`: Escopos autorizados
-
-## 🌐 Ambientes
-
-### Sandbox (Testes)
+### Criar Workspace
 
 ```php
-$authenticator = new Authenticator(
-    $httpClient,
-    'https://trust-sandbox.api.santander.com.br'
+use Matfatjoe\SantanderBoleto\Workspace\WorkspaceService;
+use Matfatjoe\SantanderBoleto\Workspace\CreateWorkspaceRequest;
+use Matfatjoe\SantanderBoleto\Models\Covenant;
+
+$workspaceService = new WorkspaceService($httpClient, $token, $clientId, $baseUrl);
+
+$request = new CreateWorkspaceRequest(
+    'BILLING',
+    [new Covenant('3567206')],
+    'Meu Workspace',
+    true,  // Webhook boleto ativo
+    true,  // Webhook PIX ativo
+    'https://meu-site.com/webhook'
 );
+
+$workspace = $workspaceService->create($request);
+echo "Workspace criado: " . $workspace->getId();
 ```
 
-### Produção
+### Registrar Boleto
 
 ```php
-$authenticator = new Authenticator(
-    $httpClient,
-    'https://trust.api.santander.com.br'
+use Matfatjoe\SantanderBoleto\Boleto\BoletoService;
+use Matfatjoe\SantanderBoleto\Boleto\RegisterBoletoRequest;
+use Matfatjoe\SantanderBoleto\Models\Boleto;
+use Matfatjoe\SantanderBoleto\Models\Payer;
+use Matfatjoe\SantanderBoleto\Models\Beneficiary;
+
+$boletoService = new BoletoService($httpClient, $token, $clientId, $baseUrl);
+
+$payer = new Payer(
+    'João da Silva',
+    'CPF',
+    '12345678901',
+    'Rua das Flores, 123',
+    'Centro',
+    'São Paulo',
+    'SP',
+    '01234-567'
 );
+
+$beneficiary = new Beneficiary(
+    'Minha Empresa LTDA',
+    'CNPJ',
+    '12345678000199'
+);
+
+$boleto = new Boleto(
+    'TESTE',
+    '1014',
+    date('Y-m-d'),
+    '3567206',
+    '000001',
+    'CLI-001',
+    date('Y-m-d', strtotime('+7 days')),
+    date('Y-m-d'),
+    'VENDA-001',
+    '150.00',
+    $payer,
+    $beneficiary
+);
+
+$registeredBoleto = $boletoService->register($workspaceId, new RegisterBoletoRequest($boleto));
+echo "Código de Barras: " . $registeredBoleto->getBarcode();
 ```
+
+### Consultar Boleto
+
+```php
+use Matfatjoe\SantanderBoleto\Query\QueryService;
+
+$queryService = new QueryService($httpClient, $token, $clientId, $baseUrl);
+
+// Por Nosso Número
+$boleto = $queryService->queryByBankNumber('3567206', '000001', 'default');
+
+// Por Seu Número
+$boleto = $queryService->queryByClientNumber('3567206', 'CLI-001', '2024-01-01', '150.00');
+
+// SONDA (confirma registro - até D+2)
+$boleto = $queryService->querySonda($workspaceId, '1014', '2024-01-01', 'TESTE', '3567206', '000001');
+```
+
+## 📚 Módulos
+
+### 🔐 Auth Module
+
+- `Authenticator` - Autenticação mTLS
+- `TokenRequest` / `TokenResponse` - Gerenciamento de tokens
+- `HttpClientFactory` - Cliente HTTP configurado
+
+### 🏢 Workspace Module
+
+- `WorkspaceService` - CRUD de workspaces
+- `CreateWorkspaceRequest` / `UpdateWorkspaceRequest` - Requests
+- `Workspace` / `Covenant` - Models
+
+### 📄 Boleto Module
+
+- `BoletoService` - Registro e instruções
+- `RegisterBoletoRequest` / `InstructionRequest` - Requests
+- `Boleto` / `Payer` / `Beneficiary` / `Discount` / `Fine` / `Interest` - Models
+
+### 🔍 Query Module
+
+- `QueryService` - Consultas de boletos
+- `QueryFilter` - Filtros de consulta
+- Métodos: SONDA, por nosso número, por seu número, lista
+
+## 📖 Exemplos
+
+Veja a pasta `examples/` para exemplos completos:
+
+- [`example-auth.php`](examples/example-auth.php) - Autenticação
+- [`example-workspace.php`](examples/example-workspace.php) - Gerenciamento de workspaces
+- [`example-boleto.php`](examples/example-boleto.php) - Registro de boletos
+- [`example-query.php`](examples/example-query.php) - Consultas
 
 ## 🧪 Testes
 
 Execute os testes unitários:
 
 ```bash
-# Com Docker
-docker-compose run --rm php vendor/bin/phpunit
-
-# Ou com PHPUnit local
-vendor/bin/phpunit
+composer test
 ```
 
-Saída esperada:
-
-```
-PHPUnit 9.6.29 by Sebastian Bergmann and contributors.
-
-Authenticator (Matfatjoe\SantanderBoleto\Tests\Auth\Authenticator)
- ✔ Get token success
- ✔ Get token failure
- ✔ Invalid certificate path
-
-OK (3 tests, 11 assertions)
-```
-
-## 🐳 Docker
-
-O projeto inclui configuração Docker para desenvolvimento:
+Ou com Docker:
 
 ```bash
-# Instalar dependências
-docker-compose run --rm php composer install
-
-# Rodar testes
-docker-compose run --rm php vendor/bin/phpunit
-
-# Executar exemplos
-docker-compose run --rm php php examples/example-auth.php
+docker-compose run --rm php vendor/bin/phpunit --testdox
 ```
 
-## 🚧 Próximas Funcionalidades
+**Cobertura atual:** 17 testes, 46 asserções ✅
 
-As seguintes funcionalidades serão implementadas em breve:
+## 📘 Documentação da API
 
-- [ ] **Gerenciamento de Workspaces**
-  - Criar, consultar, atualizar e deletar workspaces
-- [ ] **Emissão de Boletos**
-  - Registrar boletos
-  - Enviar instruções (baixa, protesto, etc.)
-- [ ] **Consultas**
-  - Consulta simples por chave sonda
-  - Consultas detalhadas com filtros
-
-## 📝 Licença
-
-Este projeto é de código aberto e está disponível sob a licença MIT.
+- [Portal do Desenvolvedor Santander](https://developer.santander.com.br/)
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+Contribuições são bem-vindas! Por favor:
 
-## ⚠️ Segurança
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: Minha nova feature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
 
-- **NUNCA** commit certificados .pfx ou senhas no repositório
-- Armazene certificados em local seguro fora do controle de versão
-- Use variáveis de ambiente para configurações sensíveis
-- O arquivo `.gitignore` já está configurado para excluir certificados
+## 📝 Licença
 
-## 📞 Suporte
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-Para dúvidas sobre a API do Santander, consulte a documentação oficial ou entre em contato com o suporte técnico do banco.
+## 🆘 Suporte
+
+- 🐛 Issues: [GitHub Issues](https://github.com/matfatjoe/api-santander/issues)
 
 ---
 
-**Desenvolvido para facilitar a integração com a API de Boletos do Santander**
+**Desenvolvido por [Matheus Furquim de Camargo](https://github.com/matfatjoe)**
