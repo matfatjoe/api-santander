@@ -7,11 +7,13 @@ class TokenRequest
     private $pfxPath;
     private $passphrase;
     private $clientId;
+    private $clientSecret;
 
     /**
      * @param string $pfxPath Path to the .pfx certificate file
      * @param string $passphrase Passphrase for the certificate
      * @param string $clientId Client ID for the API
+     * @param string $clientSecret Client Secret for the API
      */
     public function __construct(string $pfxPath, string $passphrase, string $clientId, string $clientSecret)
     {
@@ -22,6 +24,7 @@ class TokenRequest
         $this->pfxPath = $pfxPath;
         $this->passphrase = $passphrase;
         $this->clientId = $clientId;
+        $this->clientSecret = $clientSecret;
     }
 
     public function getPfxPath(): string

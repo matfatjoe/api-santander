@@ -19,7 +19,7 @@ class Token
     public function __construct(
         string $accessToken,
         int $expiresIn,
-        string $tokenType = 'bearer',
+        string $tokenType = 'Bearer',
         ?int $notBeforePolicy = null,
         ?string $sessionState = null,
         ?string $scope = null
@@ -55,7 +55,7 @@ class Token
     /**
      * Obtém o tipo do token
      * 
-     * @return string Tipo do token (normalmente "bearer")
+     * @return string Tipo do token (normalmente "Bearer")
      */
     public function getTokenType(): string
     {
@@ -150,6 +150,6 @@ class Token
      */
     public function getAuthorizationHeader(): string
     {
-        return $this->tokenType . ' ' . $this->accessToken;
+        return ucfirst($this->tokenType) . ' ' . $this->accessToken;
     }
 }
