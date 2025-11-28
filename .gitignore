@@ -14,3 +14,4 @@ test-workspace.php
 certificate.pfx
 examples/example-workspace.phpi_emissao_boletos_sand.json
 collection_api_emissao_boletos_sand.json
+test-instruction.php

@@ -63,14 +63,15 @@ class BoletoService
     /**
      * Envia uma instrução para um boleto (PATCH)
      *
+     * @param string $workspaceId
      * @param InstructionRequest $request
      * @return array
      * @throws GuzzleException
      * @throws \Exception
      */
-    public function sendInstruction(InstructionRequest $request): array
+    public function sendInstruction(string $workspaceId, InstructionRequest $request): array
     {
-        $response = $this->client->request('PATCH', $this->baseUrl . '/collection_bill_management/v2/bills', [
+        $response = $this->client->request('PATCH', $this->baseUrl . '/collection_bill_management/v2/workspaces/' . $workspaceId . '/bank_slips', [
             'headers' => [
                 'Authorization' => $this->token->getAuthorizationHeader(),
                 'X-Application-Key' => $this->clientId,

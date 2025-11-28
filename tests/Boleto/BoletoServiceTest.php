@@ -108,7 +108,7 @@ class BoletoServiceTest extends TestCase
             ]
         ]);
 
-        $response = $service->sendInstruction($request);
+        $response = $service->sendInstruction('test-workspace-id', $request);
 
         $this->assertEquals('Alteração realizada com sucesso', $response['message']);
     }
