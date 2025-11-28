@@ -97,16 +97,26 @@ class QueryService
 
         $body = $response->getBody()->getContents();
         $data = json_decode($body, true);
-
         $boletos = [];
-        if (isset($data['content']) && is_array($data['content'])) {
-            foreach ($data['content'] as $boletoData) {
+
+        // Verifica se o retorno está dentro de 'content' ou '_content' (paginação)
+        $content = $data['content'] ?? $data['_content'] ?? null;
+
+        if ($content && is_array($content)) {
+            foreach ($content as $boletoData) {
                 $boletos[] = Boleto::fromArray($boletoData);
             }
         } elseif (is_array($data)) {
-            foreach ($data as $boletoData) {
-                if (isset($boletoData['nsuCode'])) {
-                    $boletos[] = Boleto::fromArray($boletoData);
+            // Verifica se é um array de boletos ou um único boleto
+            if (isset($data['nsuCode']) || isset($data['bankslipData']) || isset($data['returnCode'])) {
+                // É um único boleto
+                $boletos[] = Boleto::fromArray($data);
+            } else {
+                // Pode ser uma lista direta
+                foreach ($data as $boletoData) {
+                    if (is_array($boletoData) && (isset($boletoData['nsuCode']) || isset($boletoData['bankslipData']))) {
+                        $boletos[] = Boleto::fromArray($boletoData);
+                    }
                 }
             }
         }

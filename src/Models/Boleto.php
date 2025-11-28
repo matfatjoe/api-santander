@@ -184,6 +184,31 @@ class Boleto
 
     public static function fromArray(array $data): self
     {
+        // Mapeamento de dados aninhados (bankslipData)
+        if (isset($data['bankslipData'])) {
+            $bsData = $data['bankslipData'];
+            $data['barcode'] = $bsData['barCode'] ?? $data['barcode'] ?? null;
+            $data['digitableLine'] = $bsData['digitableLine'] ?? $data['digitableLine'] ?? null;
+            // Outros campos que podem estar em bankslipData
+            $data['paymentType'] = $bsData['paymentType'] ?? $data['paymentType'] ?? 'REGISTRO';
+            $data['documentKind'] = $bsData['documentKind'] ?? $data['documentKind'] ?? 'DUPLICATA_MERCANTIL';
+        }
+
+        // Mapeamento de payerData para estrutura do Payer
+        if (isset($data['payerData'])) {
+            $pData = $data['payerData'];
+            $data['payer'] = [
+                'name' => $pData['payerName'] ?? '',
+                'documentType' => $pData['payerDocumentType'] ?? '',
+                'documentNumber' => $pData['payerDocumentNumber'] ?? '',
+                'address' => $pData['payerAddress'] ?? '',
+                'neighborhood' => $pData['payerNeighborhood'] ?? '',
+                'city' => $pData['payerCounty'] ?? '',
+                'state' => $pData['payerStateAbbreviation'] ?? '',
+                'zipCode' => $pData['payerZipCode'] ?? ''
+            ];
+        }
+
         return new self(
             $data['environment'] ?? '',
             $data['nsuCode'] ?? '',
