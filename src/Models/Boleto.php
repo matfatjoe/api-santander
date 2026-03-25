@@ -31,6 +31,7 @@ class Boleto
     private $qrCodePix;
     private $qrCodeUrl;
     private $messages;
+    private $payment;
 
     public function __construct(
         string $environment,
@@ -56,7 +57,8 @@ class Boleto
         ?string $digitableLine = null,
         ?string $qrCodePix = null,
         ?string $qrCodeUrl = null,
-        array $messages = []
+        array $messages = [],
+        ?Payment $payment = null
     ) {
         $this->environment = $environment;
         $this->nsuCode = $nsuCode;
@@ -82,6 +84,7 @@ class Boleto
         $this->qrCodePix = $qrCodePix;
         $this->qrCodeUrl = $qrCodeUrl;
         $this->messages = $messages;
+        $this->payment = $payment;
     }
 
     // Getters
@@ -181,6 +184,10 @@ class Boleto
     {
         return $this->messages;
     }
+    public function getPayment(): ?Payment
+    {
+        return $this->payment;
+    }
 
     public static function fromArray(array $data): self
     {
@@ -233,7 +240,10 @@ class Boleto
             $data['digitableLine'] ?? null,
             $data['qrCodePix'] ?? null,
             $data['qrCodeUrl'] ?? null,
-            $data['messages'] ?? []
+            $data['messages'] ?? [],
+            !empty($data['payment']) && is_array($data['payment'])
+                ? Payment::fromArray($data['payment'])
+                : null
         );
     }
 
@@ -282,6 +292,10 @@ class Boleto
 
         if ($this->deductionValue) {
             $data['deductionValue'] = $this->deductionValue;
+        }
+        
+        if ($this->payment) {
+            $data['payment'] = $this->payment->toArray();
         }
 
         if ($this->barcode) $data['barcode'] = $this->barcode;
