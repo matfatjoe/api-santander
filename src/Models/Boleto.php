@@ -32,6 +32,7 @@ class Boleto
     private $qrCodeUrl;
     private $messages;
     private $payment;
+    private $status;
 
     public function __construct(
         string $environment,
@@ -58,7 +59,8 @@ class Boleto
         ?string $qrCodePix = null,
         ?string $qrCodeUrl = null,
         array $messages = [],
-        ?Payment $payment = null
+        ?Payment $payment = null,
+        ?string $status = null
     ) {
         $this->environment = $environment;
         $this->nsuCode = $nsuCode;
@@ -85,6 +87,7 @@ class Boleto
         $this->qrCodeUrl = $qrCodeUrl;
         $this->messages = $messages;
         $this->payment = $payment;
+        $this->status = $status;
     }
 
     // Getters
@@ -188,6 +191,10 @@ class Boleto
     {
         return $this->payment;
     }
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
 
     public static function fromArray(array $data): self
     {
@@ -243,7 +250,8 @@ class Boleto
             $data['messages'] ?? [],
             !empty($data['payment']) && is_array($data['payment'])
                 ? Payment::fromArray($data['payment'])
-                : null
+                : null,
+            $data['status'] ?? null
         );
     }
 
@@ -262,7 +270,8 @@ class Boleto
             'nominalValue' => $this->nominalValue,
             'paymentType' => $this->paymentType,
             'documentKind' => $this->documentKind,
-            'messages' => $this->messages
+            'messages' => $this->messages,
+            'status' => $this->status
         ];
 
         if ($this->payer) {
