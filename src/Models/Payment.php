@@ -2,6 +2,8 @@
 
 namespace Matfatjoe\SantanderBoleto\Models;
 
+use Carbon\Carbon;
+
 class Payment
 {
     private $paidValue;
@@ -86,5 +88,60 @@ class Payment
     public function getPaidValue(): string
     {
         return $this->paidValue;
+    }
+
+    public function getDate(): Carbon
+    {
+        return Carbon::parse($this->date);
+    }
+
+    public function getInterestValue(): string
+    {
+        return $this->interestValue;
+    }
+
+    public function getFineValue(): string
+    {
+        return $this->fineValue;
+    }
+
+    public function getDiscountValue(): string
+    {
+        return $this->deductionValue;
+    }
+
+    public function getRebateValue(): string
+    {
+        return $this->rebateValue;
+    }
+
+    public function getIofValue(): string
+    {
+        return $this->iofValue;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getBankCode(): string
+    {
+        return $this->bankCode;
+    }
+
+    public function getChannel(): string
+    {
+        return $this->channel;
+    }
+
+    public function getKind(): string
+    {
+        return $this->kind;
+    }
+
+    public function getTxId(): string
+    {
+        return $this->txId;
     }
 }
